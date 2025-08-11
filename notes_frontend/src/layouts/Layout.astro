@@ -4,47 +4,73 @@ import ThemeToggle from '../components/ThemeToggle.astro';
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<ThemeToggle />
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Personal Notes</title>
+  </head>
+  <body>
+    <slot />
+  </body>
 </html>
 
 <style>
-	:root {
-		/* Light theme variables */
-		--bg-color: #ffffff;
-		--text-color: #111827;
-		--text-secondary: #4b5563;
-		--border-color: rgba(0, 0, 0, 0.1);
-		--card-bg: rgba(255, 255, 255, 1);
-		--card-hover-bg: rgba(255, 255, 255, 0.55);
-		--shadow-color: rgba(0, 0, 0, 0.1);
-		--shadow-hover-color: rgba(0, 0, 0, 0.15);
-	}
+  :root {
+    /* Color scheme (light) */
+    --primary: #1976d2; /* provided primary */
+    --secondary: #424242; /* provided secondary */
+    --accent: #ffd600; /* provided accent */
 
-	body.dark-theme {
-		/* Dark theme variables */
-		--bg-color: #111827;
-		--text-color: #f9fafb;
-		--text-secondary: #d1d5db;
-		--border-color: rgba(255, 255, 255, 0.2);
-		--card-bg: rgba(31, 41, 55, 0.9);
-		--card-hover-bg: rgba(31, 41, 55, 0.7);
-		--shadow-color: rgba(0, 0, 0, 0.3);
-		--shadow-hover-color: rgba(0, 0, 0, 0.4);
-	}
+    --bg-color: #ffffff;
+    --text-color: #111827;
+    --text-secondary: #4b5563;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --card-bg: #ffffff;
+    --card-hover-bg: #f7f7f7;
+    --shadow-color: rgba(0, 0, 0, 0.08);
+    --shadow-hover-color: rgba(0, 0, 0, 0.14);
 
-	html,
-	body {
-		margin: 0;
+    --header-bg: rgba(255,255,255,0.85);
+    --primary-10: rgba(25,118,210,0.12);
+    --header-height: 64px;
+  }
+
+  body.dark-theme {
+    --bg-color: #111827;
+    --text-color: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --card-bg: rgba(31, 41, 55, 0.9);
+    --card-hover-bg: rgba(31, 41, 55, 0.7);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-hover-color: rgba(0, 0, 0, 0.4);
+    --header-bg: rgba(17,24,39,0.85);
+  }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  body, button, input, textarea {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  }
+
+  button { outline: none; }
+  input, textarea { outline: none; }
+
+  /* Ensure header height variable is respected on pages */
+  :global(.app) {
+    --header-height: 64px;
+    margin-top: 0;
+  }
+</style>n: 0;
 		width: 100%;
 		height: 100%;
 		background-color: var(--bg-color);

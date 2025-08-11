@@ -1,11 +1,39 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import HeaderBar from '../components/HeaderBar.astro';
+import Sidebar from '../components/Sidebar.astro';
+import NotesList from '../components/NotesList.astro';
+import NoteEditor from '../components/NoteEditor.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <HeaderBar />
+  <main class="app">
+    <Sidebar />
+    <section class="workspace">
+      <NotesList />
+      <NoteEditor />
+    </section>
+  </main>
 </Layout>
+
+<style>
+  .app {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    height: calc(100vh - var(--header-height));
+    min-height: 520px;
+  }
+  .workspace {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-color);
+  }
+  @media (max-width: 1024px) {
+    .workspace {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

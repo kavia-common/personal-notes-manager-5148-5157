@@ -1,0 +1,140 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header class="app-header">
+  <div class="brand">
+    <div class="logo">📝</div>
+    <div class="title">
+      <h1>Personal Notes</h1>
+      <span class="subtitle">Your ideas, organized.</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" class="icon"><path d="M21 21l-4.2-4.2M10.8 18.4a7.6 7.6 0 1 1 0-15.2 7.6 7.6 0 0 1 0 15.2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input id="search-input" placeholder="Search notes" aria-label="Search notes" />
+    </div>
+    <button id="new-note-btn" class="primary">New Note</button>
+    <ThemeToggle />
+  </div>
+</header>
+
+<style>
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 20px;
+    background: var(--header-bg, #ffffff);
+    border-bottom: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .title h1 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-color);
+  }
+  .title .subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 10px;
+    min-width: 260px;
+  }
+  .search .icon {
+    color: var(--text-secondary);
+  }
+  #search-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    width: 220px;
+  }
+  .primary {
+    padding: 10px 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .primary:hover { filter: brightness(0.95); }
+  .primary:active { transform: translateY(1px); }
+
+  /* Adjust ThemeToggle embedded positioning */
+  :global(.theme-toggle) {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 40px;
+    height: 40px;
+  }
+
+  @media (max-width: 720px) {
+    .search { display: none; }
+  }
+</style>
+
+<script type="module">
+  import { store } from '../lib/notesStore.ts';
+
+  const newBtn = document.getElementById('new-note-btn');
+  const searchEl = document.getElementById('search-input');
+
+  if (newBtn) {
+    newBtn.addEventListener('click', () => {
+      store.createNote();
+      // Focus editor title when created (editor listens to active change)
+      const to = setTimeout(() => {
+        const title = document.getElementById('note-title');
+        if (title) (title as HTMLInputElement).focus();
+        clearTimeout(to);
+      }, 0);
+    });
+  }
+
+  if (searchEl) {
+    const inputEl = searchEl as HTMLInputElement;
+    inputEl.value = store.getState().search || '';
+    inputEl.addEventListener('input', () => {
+      store.setSearch(inputEl.value);
+    });
+  }
+</script>

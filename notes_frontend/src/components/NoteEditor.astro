@@ -1,0 +1,161 @@
+<section class="editor">
+  <div id="editor-empty" class="empty">
+    <p>Select a note from the list or create a new one to begin editing.</p>
+  </div>
+
+  <div id="editor-form" class="form" hidden>
+    <div class="toolbar">
+      <span id="last-updated" class="muted"></span>
+      <div class="spacer"></div>
+      <button id="save-btn" class="secondary">Save</button>
+      <button id="delete-btn" class="danger">Delete</button>
+    </div>
+    <input id="note-title" class="title" placeholder="Note title" aria-label="Note title" />
+    <textarea id="note-content" class="content" placeholder="Start typing your note..." aria-label="Note content"></textarea>
+  </div>
+</section>
+
+<style>
+  .editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-color);
+  }
+  .empty {
+    margin: auto;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spacer { flex: 1; }
+  .muted {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .title {
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: var(--text-color);
+    outline: none;
+  }
+  .content {
+    flex: 1;
+    min-height: 300px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text-color);
+    outline: none;
+    resize: vertical;
+  }
+  .secondary {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .danger {
+    padding: 8px 12px;
+    background: #ef4444;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .secondary:hover { background: var(--card-hover-bg); }
+  .danger:hover { filter: brightness(0.95); }
+
+  @media (max-width: 720px) {
+    .content { min-height: 220px; }
+  }
+</style>
+
+<script type="module">
+  import { store, NoteEvents } from '../lib/notesStore.ts';
+
+  const form = document.getElementById('editor-form')!;
+  const empty = document.getElementById('editor-empty')!;
+  const titleEl = document.getElementById('note-title') as HTMLInputElement;
+  const contentEl = document.getElementById('note-content') as HTMLTextAreaElement;
+  const saveBtn = document.getElementById('save-btn')!;
+  const delBtn = document.getElementById('delete-btn')!;
+  const updatedEl = document.getElementById('last-updated')!;
+
+  function formatTime(ts: number): string {
+    const d = new Date(ts);
+    return `Last updated ${d.toLocaleString()}`;
+  }
+
+  function setVisible(hasNote: boolean) {
+    form.hidden = !hasNote;
+    empty.hidden = hasNote;
+  }
+
+  function loadActive() {
+    const note = store.getActiveNote();
+    setVisible(!!note);
+    if (!note) return;
+    titleEl.value = note.title || '';
+    contentEl.value = note.content || '';
+    updatedEl.textContent = formatTime(note.updatedAt);
+  }
+
+  let saveTimer: number | undefined;
+
+  function scheduleAutoSave() {
+    if (saveTimer) window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(() => {
+      const note = store.getActiveNote();
+      if (!note) return;
+      store.updateNote(note.id, { title: titleEl.value, content: contentEl.value });
+    }, 300);
+  }
+
+  titleEl.addEventListener('input', scheduleAutoSave);
+  contentEl.addEventListener('input', scheduleAutoSave);
+
+  saveBtn.addEventListener('click', () => {
+    const note = store.getActiveNote();
+    if (!note) return;
+    store.updateNote(note.id, { title: titleEl.value, content: contentEl.value });
+  });
+
+  delBtn.addEventListener('click', () => {
+    const note = store.getActiveNote();
+    if (!note) return;
+    const ok = confirm('Delete this note?');
+    if (ok) store.deleteNote(note.id);
+  });
+
+  // Initial load
+  loadActive();
+
+  const onActive = () => loadActive();
+  const onNotes = () => {
+    const note = store.getActiveNote();
+    if (!note) return;
+    updatedEl.textContent = formatTime(note.updatedAt);
+  };
+
+  store.on(NoteEvents.ActiveChanged, onActive);
+  store.on(NoteEvents.NotesUpdated, onNotes);
+</script>

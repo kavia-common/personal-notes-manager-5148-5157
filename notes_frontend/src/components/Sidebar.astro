@@ -1,0 +1,127 @@
+<aside class="sidebar">
+  <nav>
+    <button id="nav-all" class="nav-item active">
+      <span class="dot" style="background: var(--primary)"></span>
+      All Notes <span id="count-all" class="count">0</span>
+    </button>
+    <button id="nav-recent" class="nav-item">
+      <span class="dot" style="background: var(--accent)"></span>
+      Recent (24h) <span id="count-recent" class="count">0</span>
+    </button>
+    <div class="spacer"></div>
+    <button id="nav-new" class="nav-item create">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      New Note
+    </button>
+  </nav>
+</aside>
+
+<style>
+  .sidebar {
+    width: 260px;
+    min-width: 200px;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-color);
+    padding: 16px;
+  }
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    text-align: left;
+  }
+  .nav-item:hover {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+  }
+  .nav-item.active {
+    background: var(--card-bg);
+    border-color: var(--primary-10, rgba(25,118,210,0.15));
+    box-shadow: 0 2px 6px var(--shadow-color);
+  }
+  .nav-item.create {
+    margin-top: 8px;
+    background: var(--primary);
+    color: white;
+    justify-content: center;
+    gap: 8px;
+  }
+  .nav-item.create:hover { filter: brightness(0.95); }
+  .dot {
+    width: 8px; height: 8px; border-radius: 999px; display: inline-block;
+  }
+  .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--badge-bg, rgba(0,0,0,0.06));
+  }
+
+  @media (max-width: 1024px) {
+    .sidebar {
+      display: none;
+    }
+  }
+</style>
+
+<script type="module">
+  import { store, NoteEvents } from '../lib/notesStore.ts';
+
+  const btnAll = document.getElementById('nav-all');
+  const btnRecent = document.getElementById('nav-recent');
+  const btnNew = document.getElementById('nav-new') as HTMLButtonElement | null;
+  const countAll = document.getElementById('count-all');
+  const countRecent = document.getElementById('count-recent');
+
+  function updateCounts() {
+    const all = store.getNotes().length;
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = store.getNotes().filter(n => n.updatedAt >= dayAgo).length;
+    if (countAll) countAll.textContent = String(all);
+    if (countRecent) countRecent.textContent = String(recent);
+  }
+
+  function setActiveNav(which: 'all' | 'recent') {
+    if (btnAll) btnAll.classList.toggle('active', which === 'all');
+    if (btnRecent) btnRecent.classList.toggle('active', which === 'recent');
+  }
+
+  if (btnAll) {
+    btnAll.addEventListener('click', () => {
+      store.clearSearch();
+      setActiveNav('all');
+    });
+  }
+
+  if (btnRecent) {
+    btnRecent.addEventListener('click', () => {
+      // Quick filter: set a token query like "updated:24h". For simplicity, we just use search to " " and then rely on list? Better: we can't change store search to time.
+      // We simulate by placing a unique marker in search input and having NotesList handle "recent:" specially. To keep it simple, we directly scroll list after store update.
+      store.setSearch('recent:24h');
+      setActiveNav('recent');
+    });
+  }
+
+  if (btnNew) {
+    btnNew.addEventListener('click', () => {
+      store.createNote();
+    });
+  }
+
+  updateCounts();
+  const handle = () => updateCounts();
+  store.on(NoteEvents.NotesUpdated, handle);
+</script>
